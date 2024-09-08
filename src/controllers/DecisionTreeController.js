@@ -152,7 +152,7 @@ module.exports = {
     async addDecisionTree (request, response) {
         console.log(request.body);
         // Start the transaction
-        const t = await db.sequelizeObject.transaction();
+        const t = await db.sequelize.transaction();
         try {
                 // First, save the new tree data into the DecisionTrees table
                 const newDecisionTree = await DecisionTree.create({
@@ -284,7 +284,7 @@ module.exports = {
         const root = request.body.decisionTreeNodes;
         
         // Start transaction
-        const t = await db.sequelizeObject.transaction();
+        const t = await db.sequelize.transaction();
         try {
             // Start by updating the nodes in the Nodes table. 
             // First the root node...
