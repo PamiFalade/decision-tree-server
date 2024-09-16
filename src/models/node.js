@@ -20,7 +20,8 @@ module.exports = (sequelize, DataTypes) => {
   Node.init({
     tree_id: DataTypes.INTEGER,
     node_name: DataTypes.STRING,
-    expected_value: DataTypes.DECIMAL,
+    expected_value: DataTypes.DECIMAL(10, 2),
+    yield: DataTypes.DECIMAL(10, 2),
     node_type: DataTypes.STRING,
     probability: DataTypes.DECIMAL,
     description: DataTypes.STRING,
