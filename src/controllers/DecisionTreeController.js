@@ -15,6 +15,7 @@ async function saveChildNodes (nodes, parentID, treeID, t) {
                     node_name: nodeData.name,
                     node_type: nodeData.attributes.type,
                     expected_value: nodeData.attributes.expectedValue,
+                    yield: nodeData.attributes.yield,
                     probability: nodeData.attributes.probability,
                     description: nodeData.attributes.description,
                     tree_id: treeID,
@@ -61,8 +62,9 @@ async function getChildNodes (parentID, treeID) {
                     parentID: parentID,
                     attributes: {
                         type: nodeData.node_type,
+                        yield: parseFloat(nodeData.yield),
                         expectedValue: nodeData.expected_value,
-                        probability: nodeData.probability,
+                        probability: parseFloat(nodeData.probability),
                         description: nodeData.description
                     },
                     children: await getChildNodes(nodeData.id, treeID)     // Recursively add children nodes
@@ -113,14 +115,15 @@ async function updateChildNodes(childNodes, parentID, treeID, t) {
         for(let i=0; i<childNodes.length; i++) {
             // For each node, update it if it already exists, and insert it if it doesn't (uses the PK to check if it exists)
             const [upsertedNode, created] = await Node.upsert({
-                NodeID: childNodes[i].id,
-                TreeID: treeID,
-                NodeName: childNodes[i].name,
-                ExpectedValue: childNodes[i].attributes.expectedValue,
-                NodeType: childNodes[i].attributes.type,
-                Probability: childNodes[i].attributes.probability,
-                Description: childNodes[i].attributes.description,
-                ParentNodeID: parentID
+                id: childNodes[i].id,
+                tree_id: treeID,
+                node_name: childNodes[i].name,
+                yield: childNodes[i].attributes.yield,
+                expected_value: childNodes[i].attributes.expectedValue,
+                node_type: childNodes[i].attributes.type,
+                probability: childNodes[i].attributes.probability,
+                description: childNodes[i].attributes.description,
+                parent_node_id: parentID
             },
             { 
                 transaction: t
@@ -168,6 +171,7 @@ module.exports = {
                 const rootNode = await Node.create({
                     tree_id: newDecisionTree.id,
                     node_name: root.name,
+                    yield: root.attributes.yield,
                     expected_value: root.attributes.expectedValue,
                     node_type: root.attributes.type,
                     probability: root.attributes.probability,
@@ -225,8 +229,9 @@ module.exports = {
                         parentID: null,
                         attributes: {
                             type: rootData.node_type,
+                            yield: parseFloat(rootData.yield),
                             expectedValue: rootData.expected_value,
-                            probability: rootData.probability,
+                            probability: parseFloat(rootData.probability),
                             description: rootData.description
                         },
                     }
@@ -289,9 +294,9 @@ module.exports = {
             // Start by updating the nodes in the Nodes table. 
             // First the root node...
             await Node.update({
-                NodeName: root.name,
-                ExpectedValue: root.attributes.expectedValue,
-                Description: root.attributes.description,
+                node_name: root.name,
+                expected_value: root.attributes.expectedValue,
+                description: root.attributes.description,
             },
             {
                 where: {

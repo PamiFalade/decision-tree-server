@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     expected_value: DataTypes.DECIMAL(10, 2),
     yield: DataTypes.DECIMAL(10, 2),
     node_type: DataTypes.STRING,
-    probability: DataTypes.DECIMAL,
+    probability: DataTypes.DECIMAL(5,4),
     description: DataTypes.STRING,
     parent_node_id: DataTypes.INTEGER
   }, {
