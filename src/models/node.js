@@ -13,8 +13,8 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Node.belongsTo(models.DecisionTree, { foreignKey: 'tree_id' });
 
-      Node.belongsTo(Node, { as: 'Parent', foreignKey: 'parent_node_id', onDelete: 'CASCADE' });
-      Node.hasMany(Node, { as: 'Children', foreignKey: 'parent_node_id', onDelete: 'CASCADE' });
+      Node.belongsTo(Node, { as: 'Parent', foreignKey: 'parent_node_id', onDelete: 'CASCADE', onUpdate: 'CASCADE', });
+      Node.hasMany(Node, { as: 'Children', foreignKey: 'parent_node_id', onDelete: 'CASCADE', onUpdate: 'CASCADE', });
     }
   }
   Node.init({

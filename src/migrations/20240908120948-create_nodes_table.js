@@ -43,6 +43,7 @@ module.exports = {
           key: 'id',
         },
         onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
         allowNull: true     // Allowed for root node
       },
       created_at: {

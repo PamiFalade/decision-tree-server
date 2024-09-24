@@ -12,6 +12,8 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       DecisionTree.belongsTo(models.User, { targetKey: 'email', foreignKey: 'creator_email' });
+
+      DecisionTree.hasMany(models.Node, { foreignKey: 'tree_id', onDelete: 'CASCADE', onUpdate: 'CASCADE'});
     }
   }
   DecisionTree.init({

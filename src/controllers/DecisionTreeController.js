@@ -350,16 +350,6 @@ module.exports = {
          // Start transaction
         const t = await db.sequelize.transaction();
         try {
-            // 1. Delete all the tree's nodes
-            // First delete all nodes that 
-            // await Node.destroy({
-            //     where: {
-            //         tree_id: treeID
-            //     }
-            // }, 
-            // { transaction: t });
-            
-            // 2. Delete the tree
             await DecisionTree.destroy({
                 where: {
                     id: treeID
