@@ -4,6 +4,7 @@ const db = require("../models/index");
 
 /// Helper function for saving the nodes of a decision tree in the database
 async function saveChildNodes (nodes, parentID, treeID, t) {
+    console.log("The parent node ID is", parentID);
     try{
         // Transform the nodes to fit the table's columns
         if(treeID == null){
@@ -43,8 +44,6 @@ async function saveChildNodes (nodes, parentID, treeID, t) {
 
 // Helper function that recursively retrieves all the nodes of a decision tree
 async function getChildNodes (parentID, treeID) {
-
-    console.log(`${parentID}, and ${treeID}`);
     const transformedNodes = [];    // The array of children of the current node
     try {
         // Get all children nodes of the current node
@@ -92,19 +91,19 @@ async function updateChildNodes(childNodes, parentID, treeID, t) {
         // Check for any nodes that were deleted
         const childNodeIds = childNodes.map(node => node.id);       // The nodes that are in the updated tree
         const deletedNodes = [...(await Node.findAll({               // The nodes whose IDs exist in the Node table, and not in the updated DecisionTree
-            attributes: ['NodeID'],
+            attributes: ['id'],
             where: {
-                ParentNodeID: parentID,
-                NodeID: {
+                parent_node_id: parentID,
+                id: {
                     [db.Op.notIn]: childNodeIds
                 }
             }
         }, 
-        { transaction: t }))].map(deletedNode => deletedNode.NodeID);
+        { transaction: t }))].map(deletedNode => deletedNode.id);
 
         await Node.destroy({                                    // Remove the deleted nodes from the Nodes table
             where: {
-                NodeID: {
+                id: {
                     [db.Op.in]: deletedNodes
                 }
             }
@@ -147,6 +146,8 @@ async function updateChildNodes(childNodes, parentID, treeID, t) {
     }
 }
 
+
+
 module.exports = {
     
     /// POST request: adding a new decision tree to the database
@@ -163,7 +164,11 @@ module.exports = {
                     creator_email: request.body.createdBy,
                     description: request.body.description
                 },
-                { transaction: t}
+                { 
+                    transaction: t,
+                    returning: true,
+                    plain: true
+                }
                 );
 
                 // Then save the root node in the Node table
@@ -178,12 +183,15 @@ module.exports = {
                     description: root.attributes.description,
                     parent_node_id: null
                 },
-                { transaction: t}
+                { 
+                    transaction: t,
+                    returning: true,
+                    plain: true
+                }
                 );
-
+                
                 // Finally, save the rest of the nodes
                 await saveChildNodes(root.children, rootNode.id, newDecisionTree.id, t);
-
                 // Commit the transaction
                 await t.commit();
 
@@ -300,8 +308,8 @@ module.exports = {
             },
             {
                 where: {
-                    NodeID: root.id,
-                    TreeID: treeID
+                    id: root.id,
+                    tree_id: treeID
                 }
             },
             { transaction: t }); 
@@ -316,7 +324,7 @@ module.exports = {
             },
             {
                 where: {
-                    TreeID: treeID
+                    id: treeID
                 }
             },
             { transaction: t });
@@ -333,9 +341,41 @@ module.exports = {
         }
         catch(err) {
             t.rollback();
-            response.send({error: err});
+            response.status(500).send({error: err});
         }
-    }
+    },
 
+    async deleteDecisionTreeAndNodes(request, response) {
+        const treeID = request.params.treeID;
+         // Start transaction
+        const t = await db.sequelize.transaction();
+        try {
+            // 1. Delete all the tree's nodes
+            // First delete all nodes that 
+            // await Node.destroy({
+            //     where: {
+            //         tree_id: treeID
+            //     }
+            // }, 
+            // { transaction: t });
+            
+            // 2. Delete the tree
+            await DecisionTree.destroy({
+                where: {
+                    id: treeID
+                }
+            }, 
+            { transaction: t });
+
+            await t.commit();
+
+            response.status(204).send();
+        }
+        catch(err) {
+            t.rollback();
+            response.status(500).send({error: err});
+        }
+
+    }
 
 }

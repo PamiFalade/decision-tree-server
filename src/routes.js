@@ -46,7 +46,9 @@ const updateDecisionTreeAndNodes = (app) => {
 
 
 /*************** Delete operations ***************/
-
+const deleteDecisionTreeAndNodes = (app) => {
+    app.delete('/api/decision-trees/:treeID', DecisionTreeController.deleteDecisionTreeAndNodes);
+}
 
 
 module.exports = (app) => {
@@ -54,5 +56,6 @@ module.exports = (app) => {
     addDecisionTree(app),
     getAllDecisionTrees(app),
     getDecisionTreeAndNodes(app),
-    updateDecisionTreeAndNodes(app)
+    updateDecisionTreeAndNodes(app),
+    deleteDecisionTreeAndNodes(app)
 }

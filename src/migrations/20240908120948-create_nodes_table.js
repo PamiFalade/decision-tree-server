@@ -42,6 +42,7 @@ module.exports = {
           model: 'dt_nodes',
           key: 'id',
         },
+        onDelete: 'CASCADE',
         allowNull: true     // Allowed for root node
       },
       created_at: {
